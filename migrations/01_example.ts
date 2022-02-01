@@ -8,7 +8,7 @@ module.exports = async (tezos: TezosToolkit, network: NetworkLiteral) => {
   const contractAddress: TezosAddress = await migrate(
     tezos,
     config.outputDirectory,
-    "Example",
+    "example",
     storage,
     network
   );

@@ -1,17 +1,11 @@
-#include "../partial/ExampleTypes.ligo"
-#include "../partial/ExampleMethods.ligo"
-
-type parameter_type     is
-  | Example             of example_param_type
-  | Example_2           of example_param_type
-
+#include "../partial/example_types.ligo"
+#include "../partial/example_methods.ligo"
 
 function main(
-  const action          : parameter_type;
-  const s               : storage_type)
-                        : return is
+  const action          : parameter_t;
+  const s               : storage_t)
+                        : return_t is
   case action of
-    Example(params)           -> (no_operations, example(params, s))
-  | Example_2(params)         -> (no_operations, example(params, s))
-
+  | Example(params)           -> (no_operations, do(params, s))
+  | Example_2(params)         -> (no_operations, do(params, s))
   end
