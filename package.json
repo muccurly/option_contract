@@ -1,5 +1,5 @@
 {
-  "name": "s",
+  "name": "Ligo-taquito-skeleton",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -13,30 +13,41 @@
     "url": "https://github.com/repo/issues"
   },
   "homepage": "https://github.com/repo#readme",
-  "engines": {
-    "node": "^14.17.1",
-    "yarn": "^1.22.10"
-  },
   "dependencies": {
-    "@taquito/signer": "^9.1.1",
-    "@taquito/taquito": "^9.2.0",
-    "dotenv": "^10.0.0",
-    "fs-extra": "^10.0.0",
-    "yargs": "^17.0.1"
+    "@taquito/signer": "^11.1.0",
+    "@taquito/taquito": "^11.1.0",
+    "@types/jest": "^27.0.2",
+    "chalk": "<5.0.0",
+    "commander": "^8.3.0",
+    "date-fns": "^2.25.0",
+    "dotenv": "^15.0.0",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.5",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
+  },
+  "engines": {
+    "node": ">=14",
+    "yarn": ">=1.22.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.18",
-    "@types/mocha": "^8.2.2",
-    "chai": "^4.3.4",
-    "mocha": "^9.0.0"
+    "@typescript-eslint/eslint-plugin": "^5.8.0",
+    "@typescript-eslint/parser": "^5.8.0",
+    "eslint": "^8.2.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-jest": "^25.2.4",
+    "eslint-plugin-jest-formatting": "^3.0.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.5.1"
   },
   "scripts": {
-    "clean": "rm -rf ./builds/",
-    "migrate": "node scripts/cli.js migrate",
-    "compile": "yarn clean && node scripts/cli.js compile",
-    "start-sandbox": "docker run --rm --name dev-sandbox --detach -p 8732:20000 tqtezos/flextesa:20210602 flobox start",
-    "stop-sandbox": "docker kill dev-sandbox",
-    "test": "mocha 'tests/*.js' --timeout 150000"
-  },
-  "target": "ES6"
+    "cli": "ts-node ./scripts/cli.ts",
+    "help": "yarn cli --help",
+    "start-sandbox": "yarn cli sandbox --up",
+    "stop-sandbox": "yarn cli sandbox --down",
+    "migrate": "yarn cli migrate",
+    "compile": "yarn compile-contract",
+    "compile-contract": "yarn cli compile -F json",
+    "test": "jest"
+  }
 }
