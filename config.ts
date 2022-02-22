@@ -46,7 +46,7 @@ export const config = {
     process.env.DEX_DEPLOYER_SK ||
     "edsk3QoqBuvdamxouPhin7swCvkQNgq4jP5KZPbwWNnwdZpSpJiEbq",
   deployNetwork: process.env.NETWORK || "sandbox",
-  contractsDirectory: "contracts/main",
+  contractsDirectory: "contracts",
   outputDirectory: "build",
   migrationsDir: "migrations",
   dockerizedLigo: true,
