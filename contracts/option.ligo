@@ -91,6 +91,8 @@ type token_info is record [
     issuer : address;
 ]
 
+type write_option_param is address * option_info
+
 type token_metadata is
 big_map (token_id, token_info)
 
@@ -112,6 +114,7 @@ type fa2_entry_points is
  | Balance_of of balance_of_param
  | Update_operators of list(update_operator)
  | Token_metadata_registry of contract(address)
+ | Write_option of write_option_param
 
 type fa2_token_metadata is
  | Token_metadata of token_metadata_param
@@ -253,15 +256,15 @@ type collection_storage is record [
  operators : operator_storage;
  token_metadata : token_metadata;
  oracle : address;
+ counter : nat;
 ]
-type return_t is (list (operation) * collection_storage)
+type return is list(operation) * collection_storage
 
 (* write option *)
-function writeOption(const addr : address;const option_params : option_info; var s : collection_storage) : return_t is
+function writeOption(const addr : address; const option_params : option_info; var s : collection_storage) : return is
 block {
-    // if Tezos.amount =/= option_params.size then failwith("incorrect option size")
-    // else skip;
-    const new_id : nat = Set.size(s.token_metadata); // id of the new token
+    //if Tezos.amount =/= option_params.size then failwith("incorrect option size") else skip;
+    const new_id : nat = s.counter + 1n; // id of the new token
     s.ledger[new_id] := addr; // update ledger with new token
     const new_info : token_info = record[
         id = new_id;
@@ -277,13 +280,15 @@ block {
 function exerciseOption(
     const params: balance_of_request;
     var storage: collection_storage
-): return_t is
+): return is
 block{
-  const option : option_info = case storage.ledger[params.token_id] of
-  | Some(data) -> data.option_data
-  | None -> failwith('Did not find Token')
+  case (storage.ledger[params.token_id]) of
+  | Some(data) -> skip
+  | None -> failwith("Did not find Token")
   end;
-  if(option.expiry > Tezos.now()) then failwith('to early')
+  var token : token_info := Option.unopt(storage.token_metadata[params.token_id]);
+  var option : option_info := token.option_data;
+  if(option.expiry < Tezos.now) then failwith("too early")
 //   else if (option.expiry < Tezos.now()) then ...
   else skip;
   
@@ -358,4 +363,5 @@ function main (const param : fa2_entry_points; const storage : collection_storag
    | Token_metadata_registry (callback) -> block {
      const callback_op = Tezos.transaction(Tezos.self_address, 0mutez, callback);
    } with (list [callback_op], storage)
+   | Write_option(params) -> writeOption(params.0, params.1, storage)
  end
