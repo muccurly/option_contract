@@ -115,7 +115,7 @@ type fa2_entry_points is
  | Update_operators of list(update_operator)
  | Token_metadata_registry of contract(address)
  | Write_option of write_option_param
-
+ | Exercise_option of balance_of_request
 type fa2_token_metadata is
  | Token_metadata of token_metadata_param
 
@@ -288,12 +288,25 @@ block{
   end;
   var token : token_info := Option.unopt(storage.token_metadata[params.token_id]);
   var option : option_info := token.option_data;
-  if(option.expiry < Tezos.now) then failwith("too early")
-//   else if (option.expiry < Tezos.now()) then ...
-  else skip;
-  
-//   make_operator_validator()
-} with ((nil : list(operation)), storage)
+  var destination : contract(unit) := case (Tezos.get_contract_opt(params.owner) : option(contract(unit))) of 
+     | Some(data) -> data
+     | None -> failwith("Invalid receiver")
+     end;
+
+  if(option.expiry > Tezos.now) then failwith("too early")
+  else if (option.expiry < Tezos.now) then block {
+      destination := case (Tezos.get_contract_opt(token.issuer) : option(contract(unit))) of 
+     | Some(data) -> data
+     | None -> failwith("Invalid receiver")
+     end;
+    failwith("option expired");
+  }
+  else block {
+    const tx_policy : operator_transfer_policy = Owner_or_operator_transfer;
+    const validator = make_operator_validator(Owner_or_operator_transfer);
+    const u = validator(params.owner, Tezos.sender, token.id, storage.operators);
+  }
+} with (list[Tezos.transaction(unit, option.size, destination)], storage)
 
 
 //объявляем функцию передачи токена. Она получает id токена, адрес отправителя и получателя, а затем проверяет, есть ли у отправителя право передать токен
@@ -364,4 +377,5 @@ function main (const param : fa2_entry_points; const storage : collection_storag
      const callback_op = Tezos.transaction(Tezos.self_address, 0mutez, callback);
    } with (list [callback_op], storage)
    | Write_option(params) -> writeOption(params.0, params.1, storage)
+   | Exercise_option(params) -> exerciseOption(params, storage)
  end
