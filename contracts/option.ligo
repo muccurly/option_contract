@@ -304,7 +304,9 @@ block{
   else block {
     const tx_policy : operator_transfer_policy = Owner_or_operator_transfer;
     const validator = make_operator_validator(Owner_or_operator_transfer);
-    const u = validator(params.owner, Tezos.sender, token.id, storage.operators);
+    
+    /// check IsOwner of token
+    const u = validator(params.owner, Tezos.sender, token.id, storage.operators); 
   }
 } with (list[Tezos.transaction(unit, option.size, destination)], storage)
 
